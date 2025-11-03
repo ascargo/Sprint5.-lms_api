@@ -22,9 +22,4 @@ class Book extends Model
     //{
     //return $this->belongsTo(BookStatus::class);
     //}
-
-    public function books()
-    {
-        return $this->hasMany(Book::class);
-    }
 }
