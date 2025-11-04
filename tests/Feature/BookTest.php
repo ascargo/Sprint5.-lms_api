@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
+use App\Models\Book;
 
 class BookTest extends TestCase
 {
@@ -45,4 +46,70 @@ class BookTest extends TestCase
             'isbn' => '978-84-949984-6-1',
         ]);
     }
+
+    public function test_it_shows_a_single_book()
+    {
+        $book = \App\Models\Book::create([
+            'title' => '1984',
+            'author' => 'George Orwell',
+            'isbn' => '9780451524935',
+            'year' => 1949,
+            'genre' => 'Current History',
+            'collection' => 'Classics',
+            'location' => 'home',
+            'cover_path' => null,
+        ]);
+
+        $response = $this->getJson("/api/v1/books/{$book->id}");
+
+        $response->assertStatus(200)
+        ->assertJsonFragment([
+            'title' => '1984',
+            'author' => 'George Orwell',
+        ]);
+    }
+
+    public function test_it_updates_a_book(): void
+    {
+        $book = Book::create([
+            'title' => 'Old Title',
+            'author' => 'Unknown Author',
+        ]);
+
+        $updatedData = [
+            'title' => 'New Title',
+            'author' => 'Famous Author',
+        ];
+
+        $response = $this->putJson("/api/v1/books/{$book->id}", $updatedData);
+
+        $response->assertOk()
+            ->assertJsonFragment([
+                'title' => 'New Title',
+                'author' => 'Famous Author',
+            ]);
+
+        $this->assertDatabaseHas('books', [
+            'id' => $book->id,
+            'title' => 'New Title',
+            'author' => 'Famous Author',
+        ]);
+    }
+
+    public function test_it_deletes_a_book(): void
+    {
+        $book = Book::create([
+            'title' => 'To Delete',
+            'author' => 'Author Name',
+        ]);
+
+        $response = $this->deleteJson("/api/v1/books/{$book->id}");
+
+        $response->assertNoContent();
+
+        $this->assertDatabaseMissing('books', [
+            'id' => $book->id,
+        ]);
+    }
+
 }
