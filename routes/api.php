@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\V1\AuthController;
 Route::prefix('v1')->group(function () {
 
     Route::post('/auth/login', [AuthController::class, 'login']);
+    Route::middleware('auth:api')->get('/auth/me', [AuthController::class, 'me']);
 
     Route::get('/books', [BookController::class, 'index']);
     Route::post('/books', [BookController::class, 'store']);
