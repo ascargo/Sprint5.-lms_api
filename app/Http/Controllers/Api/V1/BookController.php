@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Models\Book;
+use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 
 class BookController extends Controller
@@ -31,13 +31,14 @@ class BookController extends Controller
 
         $book = Book::create($data);
 
-        return response()->json($book, 201);
+        return response()->json([
+            'data' => $book,
+            'message' => 'Book created successfully',
+    ], 201);
     }
 
-    public function show($id): JsonResponse
+    public function show(Book $book): JsonResponse
     {
-        $book = Book::findOrFail($id);
-
         return response()->json([
             'data' => $book,
         ]);
@@ -54,17 +55,19 @@ class BookController extends Controller
             'collection' => 'nullable|string|max:255',
             'location' => 'nullable|string|max:255',
             'cover_path' => 'nullable|string|max:255',
-            //'status_id' => 'exists:book_statuses,id', // enable if needed
         ]);
 
         $book->update($data);
 
-        return response()->json($book);
+        return response()->json([
+            'data' => $book,
+            'message' => 'Book updated successfully',
+        ]);
     }
 
-    public function destroy(Book $book): \Illuminate\Http\JsonResponse
+    public function destroy(Book $book): JsonResponse
     {
         $book->delete();
-        return response()->json(null, 204);
+        return response()->noContent;
     }
 }

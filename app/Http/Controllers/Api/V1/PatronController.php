@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Models\Patron;
+use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 
 class PatronController extends Controller
@@ -25,13 +25,14 @@ class PatronController extends Controller
 
         $patron = Patron::create($data);
 
-        return response()->json($patron, 201);
+        return response()->json([
+            'data' => $patron,
+            'message' => 'Patron created successfully',
+        ], 201);
     }
 
-    public function show($id): JsonResponse
+    public function show(Patron $patron): JsonResponse
     {
-        $patron = Patron::findOrFail($id);
-
         return response()->json([
             'data' => $patron,
         ]);
@@ -46,13 +47,16 @@ class PatronController extends Controller
 
         $patron->update($data);
 
-        return response()->json($patron);
+        return response()->json([
+            'data' => $patron,
+            'message' => 'Patron updated succesfully',
+        ]);
     }
 
     public function destroy(Patron $patron): JsonResponse
     {
         $patron->delete();
 
-        return response()->json(null, 204);
+        return response()->noContent();
     }
 }
