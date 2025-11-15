@@ -53,7 +53,7 @@ class PatronController extends Controller
         ]);
     }
 
-    public function destroy(Patron $patron): JsonResponse
+    public function destroy(Patron $patron)
     {
         $patron->delete();
 

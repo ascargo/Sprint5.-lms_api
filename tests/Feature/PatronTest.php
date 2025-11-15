@@ -6,6 +6,8 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
 use App\Models\Patron;
+use Laravel\Passport\Passport;
+use App\Models\user;
 
 class PatronTest extends TestCase
 {
@@ -13,6 +15,8 @@ class PatronTest extends TestCase
 
     public function test_patrons_index_returns_empty_list()
     {
+        Passport::actingAs(User::factory()->create());
+
         $response = $this->getJson('/api/v1/patrons');
 
         $response->assertStatus(200)
@@ -23,6 +27,8 @@ class PatronTest extends TestCase
 
     public function test_it_creates_a_patron()
     {
+        Passport::actingAs(User::factory()->create());
+
         $payload = [
             'name' => 'Asier Comino',
             'email' => 'asier@example.com',
@@ -43,6 +49,8 @@ class PatronTest extends TestCase
 
     public function test_it_shows_a_single_patron()
     {
+        Passport::actingAs(User::factory()->create());
+
         $patron = Patron::create([
             'name' => 'Jane Doe',
             'email' => 'jane@example.com',
@@ -59,6 +67,8 @@ class PatronTest extends TestCase
 
     public function test_it_updates_a_patron()
     {
+        Passport::actingAs(User::factory()->create());
+
         $patron = Patron::create([
             'name' => 'Old Name',
             'email' => 'old@example.com',
@@ -79,6 +89,8 @@ class PatronTest extends TestCase
 
     public function test_it_deletes_a_patron()
     {
+        Passport::actingAs(User::factory()->create());
+
         $patron = Patron::create([
             'name' => 'To Delete',
             'email' => 'delete@example.com',
