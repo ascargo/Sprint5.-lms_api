@@ -3,16 +3,30 @@
 namespace Tests\Feature;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
 use App\Models\Book;
+use App\Models\User;
+use Laravel\Passport\Passport;
 
 class BookTest extends TestCase
 {
     use RefreshDatabase;
 
+    public function actingAsAdmin(): User
+    {
+        $user = User::factory()->create([
+            'role' => 'admin',
+        ]);
+
+        Passport::actingAs($user);
+
+        return $user;
+    }
+
     public function test_books_index_returns_empty_list()
     {
+        $this->actingAsAdmin();
+
         $response = $this->getJson('/api/v1/books');
 
         $response->assertStatus(200)
@@ -23,6 +37,8 @@ class BookTest extends TestCase
 
     public function test_it_creates_a_book()
     {
+        $this->actingAsAdmin();
+
         $payload = [
             'title' => 'Vivir aquí y ahora',
             'author' => 'Sergio Forgas Berdet',
@@ -49,6 +65,8 @@ class BookTest extends TestCase
 
     public function test_it_shows_a_single_book()
     {
+        $this->actingAsAdmin();
+
         $book = \App\Models\Book::create([
             'title' => '1984',
             'author' => 'George Orwell',
@@ -71,6 +89,8 @@ class BookTest extends TestCase
 
     public function test_it_updates_a_book(): void
     {
+        $this->actingAsAdmin();
+
         $book = Book::create([
             'title' => 'Old Title',
             'author' => 'Unknown Author',
@@ -98,6 +118,8 @@ class BookTest extends TestCase
 
     public function test_it_deletes_a_book(): void
     {
+        $this->actingAsAdmin();
+
         $book = Book::create([
             'title' => 'To Delete',
             'author' => 'Author Name',
