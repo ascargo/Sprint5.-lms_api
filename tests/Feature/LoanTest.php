@@ -2,9 +2,10 @@
 
 namespace Tests\Feature;
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Laravel\Passport\Passport;
+use App\Models\User;
 use App\Models\Loan;
 use App\Models\Book;
 use App\Models\Patron;
@@ -13,26 +14,33 @@ class LoanTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        Passport::actingAs(
+            User::factory()->create()
+        );
+    }
+
     public function test_loans_index_returns_empty_list()
     {
         $response = $this->getJson('/api/v1/loans');
 
         $response->assertStatus(200)
-            ->assertJson([
-                'data' => [],
-            ]);
+            ->assertJson(['data' => []]);
     }
 
     public function test_it_creates_a_loan()
     {
-        $book = \App\Models\Book::factory()->create();
-        $patron = \App\Models\Patron::factory()->create();
+        $book = Book::factory()->create();
+        $patron = Patron::factory()->create();
 
         $payload = [
             'book_id' => $book->id,
             'patron_id' => $patron->id,
-            'loaned_at' => now()->toDateString(),
-            'due_at' => now()->addDays(14)->toDateString(),
+            'loaned_at' => '2024-01-01',
+            'due_at' => '2024-01-10',
         ];
 
         $response = $this->postJson('/api/v1/loans', $payload);
@@ -85,12 +93,12 @@ class LoanTest extends TestCase
     public function test_it_updates_a_loan(): void
     {
         $loan = Loan::factory()
-        ->for(Book::factory())
-        ->for(Patron::factory())
-        ->create([
-            'loaned_at' => now(),
-            'due_at' => now()->addDays(7),
-        ]);
+            ->for(Book::factory())
+            ->for(Patron::factory())
+            ->create([
+                'loaned_at' => '2024-01-01',
+                'due_at' => '2024-01-10',
+            ]);
 
         $newDueDate = now()->addDays(14)->toDateString();
 
@@ -120,6 +128,9 @@ class LoanTest extends TestCase
         $response = $this->deleteJson("/api/v1/loans/{$loan->id}");
 
         $response->assertNoContent();
-        $this->assertDataBaseMissing('loans', ['id' => $loan->id]);
+
+        $this->assertDatabaseMissing('loans', [
+            'id' => $loan->id,
+        ]);
     }
 }

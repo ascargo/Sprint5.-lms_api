@@ -20,11 +20,14 @@ class LoanFactory extends Factory
      */
     public function definition(): array
     {
+        $loaned = $this->faker->dateTimeBetween('-2 years', 'now');
+        $due = (clone $loaned)->modify('+' . rand(1, 30) . ' days');
+
         return [
             'book_id' => Book::factory(),
             'patron_id' => Patron::factory(),
-            'loaned_at' => $this->faker->date(),
-            'due_at' => $this->faker->date('+2 weeks'),
+            'loaned_at' => $loaned,
+            'due_at' => $due,
         ];
     }
 }

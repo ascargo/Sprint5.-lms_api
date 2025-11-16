@@ -3,9 +3,11 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
-use App\Models\Loan;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use App\Models\Loan;
+use App\Models\User;
+use Laravel\Passport\Passport;
 
 class LoanController extends Controller
 {
@@ -18,6 +20,7 @@ class LoanController extends Controller
 
     public function store(Request $request): JsonResponse
     {
+
         $data = $request->validate([
             'book_id' => 'required|exists:books,id',
             'patron_id' => 'required|exists:patrons,id',
@@ -57,7 +60,7 @@ class LoanController extends Controller
         ]);
     }
 
-    public function destroy(Loan $loan): JsonResponse
+    public function destroy(Loan $loan)
     {
         $loan->delete();
 
