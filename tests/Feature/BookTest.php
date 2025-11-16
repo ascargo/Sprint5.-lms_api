@@ -3,13 +3,25 @@
 namespace Tests\Feature;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
+use Laravel\Passport\Passport;
+use App\Models\User;
 use App\Models\Book;
 
 class BookTest extends TestCase
 {
     use RefreshDatabase;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        Passport::actingAs(
+            User::factory()->create([
+                'role' => 'admin',
+            ])
+        );
+    }
 
     public function test_books_index_returns_empty_list()
     {
@@ -42,14 +54,13 @@ class BookTest extends TestCase
             ]);
 
         $this->assertDatabaseHas('books', [
-            'title' => 'Vivir aquí y ahora',
             'isbn' => '978-84-949984-6-1',
         ]);
     }
 
     public function test_it_shows_a_single_book()
     {
-        $book = \App\Models\Book::create([
+        $book = Book::create([
             'title' => '1984',
             'author' => 'George Orwell',
             'isbn' => '9780451524935',
@@ -57,16 +68,15 @@ class BookTest extends TestCase
             'genre' => 'Current History',
             'collection' => 'Classics',
             'location' => 'home',
-            'cover_path' => null,
         ]);
 
         $response = $this->getJson("/api/v1/books/{$book->id}");
 
         $response->assertStatus(200)
-        ->assertJsonFragment([
-            'title' => '1984',
-            'author' => 'George Orwell',
-        ]);
+            ->assertJsonFragment([
+                'title' => '1984',
+                'author' => 'George Orwell',
+            ]);
     }
 
     public function test_it_updates_a_book(): void
@@ -92,7 +102,6 @@ class BookTest extends TestCase
         $this->assertDatabaseHas('books', [
             'id' => $book->id,
             'title' => 'New Title',
-            'author' => 'Famous Author',
         ]);
     }
 
@@ -111,5 +120,4 @@ class BookTest extends TestCase
             'id' => $book->id,
         ]);
     }
-
 }

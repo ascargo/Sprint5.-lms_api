@@ -6,10 +6,24 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
 use App\Models\Patron;
+use Laravel\Passport\Passport;
+use App\Models\User;
 
 class PatronTest extends TestCase
 {
     use RefreshDatabase;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        Passport::actingAs(
+            User::factory()->create([
+                'role' => 'admin'
+            ])
+        );
+    }
+
 
     public function test_patrons_index_returns_empty_list()
     {

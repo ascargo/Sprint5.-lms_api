@@ -1,5 +1,6 @@
 <?php
 
+
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -12,9 +13,9 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        // Register route middleware alias
         $middleware->alias([
             'role' => \App\Http\Middleware\EnsureUserHasRole::class,
+            'patron.owns.loan' => \App\Http\Middleware\EnsurePatronOwnsLoan::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

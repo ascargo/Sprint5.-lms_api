@@ -57,6 +57,6 @@ class PatronController extends Controller
     {
         $patron->delete();
 
-        return response()->noContent();
+        return response()->json(null, 204);
     }
 }

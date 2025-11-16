@@ -8,10 +8,24 @@ use Tests\TestCase;
 use App\Models\Loan;
 use App\Models\Book;
 use App\Models\Patron;
+use Laravel\Passport\Passport;
+use App\Models\User;
 
 class LoanTest extends TestCase
 {
     use RefreshDatabase;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        Passport::actingAs(
+            User::factory()->create([
+                'role' => 'admin'
+            ])
+        );
+    }
+
 
     public function test_loans_index_returns_empty_list()
     {
@@ -120,6 +134,6 @@ class LoanTest extends TestCase
         $response = $this->deleteJson("/api/v1/loans/{$loan->id}");
 
         $response->assertNoContent();
-        $this->assertDataBaseMissing('loans', ['id' => $loan->id]);
+        $this->assertDatabaseMissing('loans', ['id' => $loan->id]);
     }
 }
