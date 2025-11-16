@@ -18,11 +18,6 @@ class Book extends Model
         'collection',
         'location',
         'cover_path',
-        //'status_id',
+        'status',
     ];
-
-    //public function status()
-    //{
-    //return $this->belongsTo(BookStatus::class);
-    //}
 }

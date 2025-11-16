@@ -3,9 +3,11 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
-use App\Models\Loan;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use App\Models\Book;
+use App\Models\Loan;
+use App\Models\Patron;
 
 class LoanController extends Controller
 {
@@ -25,10 +27,21 @@ class LoanController extends Controller
             'due_at' => 'required|date|after_or_equal:loaned_at',
         ]);
 
+        $book = Book::findOrFail($data['book_id']);
+
+        if ($book->status !== 'available') {
+            return response()->json([
+                'message' => 'Book is not available for loan',
+            ], 422);
+        }
+
         $loan = Loan::create($data);
 
+        // update book status
+        $book->update(['status' => 'loaned']);
+
         return response()->json([
-            'data' => $loan->load(['book','patron']),
+            'data' => $loan->load(['book', 'patron']),
             'message' => 'Loan created successfully',
         ], 201);
     }
@@ -59,7 +72,9 @@ class LoanController extends Controller
 
     public function destroy(Loan $loan): JsonResponse
     {
+        $book = $loan->book;
         $loan->delete();
+        $book->update(['status' => 'available']);
 
         return response()->json(null, 204);
     }

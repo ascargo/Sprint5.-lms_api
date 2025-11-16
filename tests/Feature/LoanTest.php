@@ -136,4 +136,61 @@ class LoanTest extends TestCase
         $response->assertNoContent();
         $this->assertDatabaseMissing('loans', ['id' => $loan->id]);
     }
+
+    public function test_cannot_create_loan_if_book_not_available()
+    {
+        $book = Book::factory()->create(['status' => 'loaned']);
+        $patron = Patron::factory()->create();
+
+        $payload = [
+            'book_id' => $book->id,
+            'patron_id' => $patron->id,
+            'loaned_at' => now()->toDateString(),
+            'due_at' => now()->addDays(7)->toDateString(),
+        ];
+
+        $response = $this->postJson('/api/v1/loans', $payload);
+
+        $response->assertStatus(422)
+            ->assertJsonFragment(['message' => 'Book is not available for loan']);
+    }
+
+    public function test_book_status_changes_to_loaned_after_loan_created()
+    {
+        $book = Book::factory()->create(['status' => 'available']);
+        $patron = Patron::factory()->create();
+
+        $payload = [
+            'book_id' => $book->id,
+            'patron_id' => $patron->id,
+            'loaned_at' => now()->toDateString(),
+            'due_at' => now()->addDays(7)->toDateString(),
+        ];
+
+        $this->postJson('/api/v1/loans', $payload)->assertCreated();
+
+        $this->assertDatabaseHas('books', [
+            'id' => $book->id,
+            'status' => 'loaned',
+        ]);
+    }
+
+    public function test_book_becomes_available_after_loan_deleted()
+    {
+        $loan = Loan::factory()
+            ->for(Book::factory()->state(['status' => 'available']))
+            ->for(Patron::factory())
+            ->create();
+
+        // first loan => should set book to loaned
+        $loan->book->update(['status' => 'loaned']);
+
+        $this->deleteJson("/api/v1/loans/{$loan->id}")
+            ->assertNoContent();
+
+        $this->assertDatabaseHas('books', [
+            'id' => $loan->book_id,
+            'status' => 'available',
+        ]);
+    }
 }
