@@ -14,9 +14,7 @@ Route::prefix('v1')->group(function () {
     Route::middleware('auth:api')->group(function () {
         Route::get('/auth/me', [AuthController::class, 'me']);
         Route::post('/auth/logout', [AuthController::class, 'logout']);
-    });
 
-    Route::middleware('auth:api')->group(function () {
         Route::apiResource('books', BookController::class);
         Route::apiResource('patrons', PatronController::class);
         Route::apiResource('loans', LoanController::class);
