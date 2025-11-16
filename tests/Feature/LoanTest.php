@@ -14,17 +14,20 @@ class LoanTest extends TestCase
 {
     use RefreshDatabase;
 
-    protected function setUp(): void
+    public function actingAsAdmin(): User
     {
-        parent::setUp();
+        $user = User::factory()->create([
+            'role' => 'admin'
+        ]);
 
-        Passport::actingAs(
-            User::factory()->create()
-        );
+        Passport::actingAs($user);
+        return $user;
     }
 
     public function test_loans_index_returns_empty_list()
     {
+        $this->actingAsAdmin();
+
         $response = $this->getJson('/api/v1/loans');
 
         $response->assertStatus(200)
@@ -33,6 +36,8 @@ class LoanTest extends TestCase
 
     public function test_it_creates_a_loan()
     {
+        $this->actingAsAdmin();
+
         $book = Book::factory()->create();
         $patron = Patron::factory()->create();
 
@@ -59,6 +64,8 @@ class LoanTest extends TestCase
 
     public function test_it_lists_loans(): void
     {
+        $this->actingAsAdmin();
+
         $loan = Loan::factory()
             ->for(Book::factory())
             ->for(Patron::factory())
@@ -75,6 +82,8 @@ class LoanTest extends TestCase
 
     public function test_it_shows_a_loan(): void
     {
+        $this->actingAsAdmin();
+
         $loan = Loan::factory()
             ->for(Book::factory())
             ->for(Patron::factory())
@@ -92,6 +101,8 @@ class LoanTest extends TestCase
 
     public function test_it_updates_a_loan(): void
     {
+        $this->actingAsAdmin();
+
         $loan = Loan::factory()
             ->for(Book::factory())
             ->for(Patron::factory())
@@ -120,6 +131,8 @@ class LoanTest extends TestCase
 
     public function test_it_deletes_a_loan(): void
     {
+        $this->actingAsAdmin();
+
         $loan = Loan::factory()
             ->for(Book::factory())
             ->for(Patron::factory())

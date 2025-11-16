@@ -3,19 +3,28 @@
 namespace Tests\Feature;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
 use App\Models\Patron;
+use App\Models\User;
 use Laravel\Passport\Passport;
-use App\Models\user;
 
 class PatronTest extends TestCase
 {
     use RefreshDatabase;
 
+    public function actingAsAdmin(): User
+    {
+        $user = User::factory()->create([
+            'role' => 'admin'
+        ]);
+
+        Passport::actingAs($user);
+        return $user;
+    }
+
     public function test_patrons_index_returns_empty_list()
     {
-        Passport::actingAs(User::factory()->create());
+        $this->actingAsAdmin();
 
         $response = $this->getJson('/api/v1/patrons');
 
@@ -27,7 +36,7 @@ class PatronTest extends TestCase
 
     public function test_it_creates_a_patron()
     {
-        Passport::actingAs(User::factory()->create());
+        $this->actingAsAdmin();
 
         $payload = [
             'name' => 'Asier Comino',
@@ -49,7 +58,7 @@ class PatronTest extends TestCase
 
     public function test_it_shows_a_single_patron()
     {
-        Passport::actingAs(User::factory()->create());
+        $this->actingAsAdmin();
 
         $patron = Patron::create([
             'name' => 'Jane Doe',
@@ -67,7 +76,7 @@ class PatronTest extends TestCase
 
     public function test_it_updates_a_patron()
     {
-        Passport::actingAs(User::factory()->create());
+        $this->actingAsAdmin();
 
         $patron = Patron::create([
             'name' => 'Old Name',
@@ -89,7 +98,7 @@ class PatronTest extends TestCase
 
     public function test_it_deletes_a_patron()
     {
-        Passport::actingAs(User::factory()->create());
+        $this->actingAsAdmin();
 
         $patron = Patron::create([
             'name' => 'To Delete',
