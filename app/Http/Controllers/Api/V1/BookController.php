@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Book;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use App\Http\Requests\BookRequest;
 
 class BookController extends Controller
 {
@@ -16,7 +17,7 @@ class BookController extends Controller
         ]);
     }
 
-    public function store(Request $request): JsonResponse
+    public function store(BookRequest $request): JsonResponse
     {
         $data = $request->validate([
             'title' => 'required|string|max:255',
@@ -28,6 +29,8 @@ class BookController extends Controller
             'location' => 'nullable|string',
             'cover_path' => 'nullable|string',
         ]);
+
+        $data = $request->validated();
 
         $book = Book::create($data);
 
@@ -44,7 +47,7 @@ class BookController extends Controller
         ]);
     }
 
-    public function update(Request $request, Book $book): JsonResponse
+    public function update(BookRequest $request, Book $book): JsonResponse
     {
         $data = $request->validate([
             'title' => 'required|string|max:255',
@@ -56,6 +59,8 @@ class BookController extends Controller
             'location' => 'nullable|string|max:255',
             'cover_path' => 'nullable|string|max:255',
         ]);
+
+        $data = $request->validated();
 
         $book->update($data);
 

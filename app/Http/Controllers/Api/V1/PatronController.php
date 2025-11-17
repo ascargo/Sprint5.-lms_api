@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Patron;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use App\Http\Requests\PatronRequest;
 
 class PatronController extends Controller
 {
@@ -16,12 +17,9 @@ class PatronController extends Controller
         ]);
     }
 
-    public function store(Request $request): JsonResponse
+    public function store(PatronRequest $request): JsonResponse
     {
-        $data = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:patrons,email',
-        ]);
+        $data = $request->validated();
 
         $patron = Patron::create($data);
 
@@ -31,6 +29,7 @@ class PatronController extends Controller
         ], 201);
     }
 
+
     public function show(Patron $patron): JsonResponse
     {
         return response()->json([
@@ -38,18 +37,15 @@ class PatronController extends Controller
         ]);
     }
 
-    public function update(Request $request, Patron $patron): JsonResponse
+    public function update(PatronRequest $request, Patron $patron): JsonResponse
     {
-        $data = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:patrons,email,' . $patron->id,
-        ]);
+        $data = $request->validated();
 
         $patron->update($data);
 
         return response()->json([
             'data' => $patron,
-            'message' => 'Patron updated succesfully',
+            'message' => 'Patron updated successfully',
         ]);
     }
 
