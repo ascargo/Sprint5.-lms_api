@@ -7,6 +7,7 @@ use App\Models\Book;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use App\Http\Requests\BookRequest;
+use App\Http\Requests\BookUpdateRequest;
 
 class BookController extends Controller
 {
@@ -70,19 +71,8 @@ class BookController extends Controller
         ]);
     }
 
-    public function update(BookRequest $request, Book $book): JsonResponse
+    public function update(BookUpdateRequest $request, Book $book): JsonResponse
     {
-        $data = $request->validate([
-            'title' => 'required|string|max:255',
-            'author' => 'required|string|max:255',
-            'isbn' => 'nullable|string|max:20|unique:books,isbn,' . $book->id,
-            'year' => 'nullable|integer',
-            'genre' => 'nullable|string|max:255',
-            'collection' => 'nullable|string|max:255',
-            'location' => 'nullable|string|max:255',
-            'cover_path' => 'nullable|string|max:255',
-        ]);
-
         $data = $request->validated();
 
         $book->update($data);
