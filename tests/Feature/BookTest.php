@@ -120,4 +120,28 @@ class BookTest extends TestCase
             'id' => $book->id,
         ]);
     }
+
+    public function test_it_filters_books_by_status()
+    {
+        Book::factory()->create(['status' => 'available']);
+        Book::factory()->create(['status' => 'loaned']);
+
+        $response = $this->getJson('/api/v1/books?status=available');
+
+        $response->assertOk();
+        $this->assertCount(1, $response->json('data'));
+        $this->assertEquals('available', $response->json('data')[0]['status']);
+    }
+
+    public function test_it_filters_books_by_author()
+    {
+        Book::factory()->create(['author' => 'Sergio Forgas']);
+        Book::factory()->create(['author' => 'Someone Else']);
+
+        $response = $this->getJson('/api/v1/books?author=Sergio');
+
+        $response->assertOk();
+        $this->assertCount(1, $response->json('data'));
+    }
+
 }
