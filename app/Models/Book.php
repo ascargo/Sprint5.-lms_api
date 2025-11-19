@@ -20,4 +20,37 @@ class Book extends Model
         'cover_path',
         'status',
     ];
+
+    public function scopeStatus($query, $status)
+    {
+        if (!empty($status)) {
+            return $query->where('status', $status);
+        }
+        return $query;
+    }
+
+    public function scopeAuthor($query, $author)
+    {
+        if (!empty($author)) {
+            return $query->where('author', 'LIKE', "%{$author}%");
+        }
+        return $query;
+    }
+
+    public function scopeTitle($query, $title)
+    {
+        if (!empty($title)) {
+            return $query->where('title', 'LIKE', "%{$title}%");
+        }
+        return $query;
+    }
+
+    public function scopeGenre($query, $genre)
+    {
+        if (!empty($genre)) {
+            return $query->where('genre', 'LIKE', "%{$genre}%");
+        }
+        return $query;
+    }
+
 }
