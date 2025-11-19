@@ -13,31 +13,14 @@ class BookController extends Controller
 {
     public function index(Request $request): JsonResponse
     {
-        $query = Book::query();
+        $books = Book::query()
+            ->status($request->query('status'))
+            ->author($request->query('author'))
+            ->title($request->query('title'))
+            ->genre($request->query('genre'))
+            ->get();
 
-        if ($request->filled('status')) {
-            $query->where('status', $request->status);
-        }
-
-        if ($request->filled('author')) {
-            $query->where('author', 'like', '%' . $request->author . '%');
-        }
-
-        if ($request->filled('title')) {
-            $query->where('title', 'like', '%' . $request->title . '%');
-        }
-
-        if ($request->filled('genre')) {
-            $query->where('genre', 'like', '%' . $request->genre . '%');
-        }
-
-        if ($request->filled('year')) {
-            $query->where('year', $request->year);
-        }
-
-        return response()->json([
-            'data' => $query->get(),
-        ]);
+        return response()->json(['data' => $books]);
     }
 
 
