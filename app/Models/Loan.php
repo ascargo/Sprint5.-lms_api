@@ -25,4 +25,11 @@ class Loan extends Model
     {
         return $this->belongsTo(Patron::class);
     }
+
+    public function scopeOverdue($query)
+    {
+        return $query
+            ->whereNull('returned_at')
+            ->whereDate('due_at', '<', now());
+    }
 }

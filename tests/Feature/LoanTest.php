@@ -32,8 +32,11 @@ class LoanTest extends TestCase
         $response = $this->getJson('/api/v1/loans');
 
         $response->assertStatus(200)
-            ->assertJson([
-                'data' => [],
+            ->assertJsonStructure([
+                'data',
+                'current_page',
+                'last_page',
+                'total'
             ]);
     }
 

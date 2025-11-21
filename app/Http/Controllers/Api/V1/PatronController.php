@@ -12,9 +12,7 @@ class PatronController extends Controller
 {
     public function index(): JsonResponse
     {
-        return response()->json([
-            'data' => Patron::all(),
-        ]);
+        return response()->json(Patron::paginate(10));
     }
 
     public function store(PatronRequest $request): JsonResponse

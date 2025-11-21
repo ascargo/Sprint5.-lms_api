@@ -28,8 +28,11 @@ class BookTest extends TestCase
         $response = $this->getJson('/api/v1/books');
 
         $response->assertStatus(200)
-            ->assertJson([
-                'data' => [],
+            ->assertJsonStructure([
+                'data',
+                'current_page',
+                'last_page',
+                'total'
             ]);
     }
 
@@ -142,6 +145,24 @@ class BookTest extends TestCase
 
         $response->assertOk();
         $this->assertCount(1, $response->json('data'));
+    }
+
+    public function test_books_are_paginated()
+    {
+        Book::factory()->count(30)->create();
+
+        $response = $this->getJson('/api/v1/books');
+
+        $response->assertOk()
+            ->assertJsonStructure([
+                'data',
+                'current_page',
+                'last_page',
+                'per_page',
+                'total'
+            ]);
+
+        $this->assertCount(10, $response->json('data'));
     }
 
 }
