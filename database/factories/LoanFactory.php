@@ -19,6 +19,21 @@ class LoanFactory extends Factory
             'patron_id' => Patron::factory(),
             'loaned_at' => $loanedAt->toDateString(),
             'due_at' => $dueAt->toDateString(),
+            'returned_at' => null,
         ];
+    }
+
+    public function forBook(Book $book)
+    {
+        return $this->state([
+            'book_id' => $book->id,
+        ]);
+    }
+
+    public function forPatron(Patron $patron)
+    {
+        return $this->state([
+            'patron_id' => $patron->id,
+        ]);
     }
 }
