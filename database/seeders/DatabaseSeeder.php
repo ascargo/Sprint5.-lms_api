@@ -15,17 +15,11 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // 👇 Create one admin user
-        User::factory()->create([
-            'name' => 'Admin',
-            'email' => 'admin@domus.com',
-            'password' => bcrypt('password'),
-            'role' => 'admin',
-        ]);
-
-        // 👇 Create several patron users
-        User::factory(3)->create([
-            'role' => 'patron',
+        $this->call([
+            UserSeeder::class,
+            PatronSeeder::class,
+            BookSeeder::class,
+            LoanSeeder::class,
         ]);
     }
 }
