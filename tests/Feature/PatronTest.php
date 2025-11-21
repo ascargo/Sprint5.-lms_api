@@ -30,8 +30,11 @@ class PatronTest extends TestCase
         $response = $this->getJson('/api/v1/patrons');
 
         $response->assertStatus(200)
-            ->assertJson([
-                'data' => [],
+            ->assertJsonStructure([
+                'data',
+                'current_page',
+                'last_page',
+                'total'
             ]);
     }
 

@@ -11,16 +11,16 @@ use App\Http\Requests\BookUpdateRequest;
 
 class BookController extends Controller
 {
-    public function index(Request $request): JsonResponse
+    public function index(Request $request)
     {
         $books = Book::query()
             ->status($request->query('status'))
             ->author($request->query('author'))
             ->title($request->query('title'))
             ->genre($request->query('genre'))
-            ->get();
+            ->paginate(10);
 
-        return response()->json(['data' => $books]);
+        return $books;
     }
 
 

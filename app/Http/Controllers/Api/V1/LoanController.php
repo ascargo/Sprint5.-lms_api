@@ -13,9 +13,8 @@ class LoanController extends Controller
 {
     public function index(): JsonResponse
     {
-        return response()->json([
-            'data' => Loan::with(['book','patron'])->get(),
-        ]);
+        $loans = Loan::with(['book', 'patron'])->paginate(10);
+        return response()->json($loans);
     }
 
     public function store(Request $request): JsonResponse

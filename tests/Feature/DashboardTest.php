@@ -28,6 +28,15 @@ class DashboardTest extends TestCase
             'due_at' => now()->addDays(5)->toDateString(),
         ]);
 
+        $overdueBook = Book::factory()->create(['status' => 'loaned']);
+        Loan::factory()->create([
+            'book_id'   => $overdueBook->id,
+            'patron_id' => Patron::factory()->create()->id,
+            'loaned_at' => now()->subDays(10)->toDateString(),
+            'due_at'    => now()->subDays(1)->toDateString(), // past due
+            'returned_at' => null,
+        ]);
+
         $admin = \App\Models\User::factory()->create([
             'role' => 'admin',
         ]);
@@ -43,14 +52,16 @@ class DashboardTest extends TestCase
                     'loaned_books',
                     'total_patrons',
                     'active_loans',
+                    'overdue_loans',
                 ]
             ])
             ->assertJsonFragment([
-                'total_books' => 8,
+                'total_books' => 9,
                 'available_books' => 5,
-                'loaned_books' => 3,
-                'total_patrons' => 4,
-                'active_loans' => 1,
+                'loaned_books' => 4,
+                'total_patrons' => 5,
+                'active_loans' => 2,
+                'overdue_loans' => 1,
             ]);
     }
 }
