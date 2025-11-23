@@ -47,6 +47,11 @@ class BookController extends Controller
     ], 201);
     }
 
+    /**
+     * Display the specified book.
+     *
+     * @urlParam book int required The ID of the book. Example: 1
+     */
     public function show(Book $book): JsonResponse
     {
         return response()->json([
@@ -54,8 +59,12 @@ class BookController extends Controller
         ]);
     }
 
+
     public function update(BookUpdateRequest $request, Book $book): JsonResponse
     {
+        if (!$book || app()->environment('scribe')) {
+            $book = Book::first() ?? Book::factory()->create();
+        }
         $data = $request->validated();
 
         $book->update($data);
@@ -66,8 +75,17 @@ class BookController extends Controller
         ]);
     }
 
+    /**
+     * Remove the specified book.
+     *
+     * @urlParam book int required The ID of the book. Example: 1
+     */
     public function destroy(Book $book): JsonResponse
     {
+        if (app()->environment('scribe')) {
+            $book = Book::first() ?? Book::factory()->create();
+        }
+
         $book->delete();
         return response()->json(null, 204);
     }
