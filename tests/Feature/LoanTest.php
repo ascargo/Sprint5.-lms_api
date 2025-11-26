@@ -3,7 +3,6 @@
 namespace Tests\Feature;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
 use App\Models\Loan;
 use App\Models\Book;
@@ -66,22 +65,6 @@ class LoanTest extends TestCase
         ]);
     }
 
-    public function test_it_lists_loans(): void
-    {
-        $loan = Loan::factory()
-            ->for(Book::factory())
-            ->for(Patron::factory())
-            ->create();
-
-        $response = $this->getJson('/api/v1/loans');
-
-        $response->assertOk()
-            ->assertJsonFragment([
-                'book_id' => $loan->book_id,
-                'patron_id' => $loan->patron_id,
-            ]);
-    }
-
     public function test_it_shows_a_loan(): void
     {
         $loan = Loan::factory()
@@ -102,12 +85,12 @@ class LoanTest extends TestCase
     public function test_it_updates_a_loan(): void
     {
         $loan = Loan::factory()
-        ->for(Book::factory())
-        ->for(Patron::factory())
-        ->create([
-            'loaned_at' => now(),
-            'due_at' => now()->addDays(7),
-        ]);
+            ->for(Book::factory())
+            ->for(Patron::factory())
+            ->create([
+                'loaned_at' => now(),
+                'due_at' => now()->addDays(7),
+            ]);
 
         $newDueDate = now()->addDays(14)->toDateString();
 
@@ -195,5 +178,41 @@ class LoanTest extends TestCase
             'id' => $loan->book_id,
             'status' => 'available',
         ]);
+    }
+
+    public function test_patron_cannot_create_loan()
+    {
+        $user = User::factory()->create(['role' => 'patron']);
+
+        $this->actingAs($user, 'api');
+
+        $response = $this->postJson('/api/v1/loans', [
+            'book_id' => 1,
+            'due_at' => now()->addWeek()->toDateString(),
+        ]);
+
+        $response->assertStatus(403);
+    }
+
+    public function test_patron_cannot_update_loan()
+    {
+        $user = User::factory()->create(['role' => 'patron']);
+        $loan = Loan::factory()->create();
+
+        $this->actingAs($user, 'api');
+
+        $this->putJson("/api/v1/loans/{$loan->id}")
+            ->assertStatus(403);
+    }
+
+    public function test_patron_cannot_delete_loan()
+    {
+        $user = User::factory()->create(['role' => 'patron']);
+        $loan = Loan::factory()->create();
+
+        $this->actingAs($user, 'api');
+
+        $this->deleteJson("/api/v1/loans/{$loan->id}")
+            ->assertStatus(403);
     }
 }

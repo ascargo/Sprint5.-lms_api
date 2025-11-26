@@ -13,7 +13,14 @@ class LoanController extends Controller
 {
     public function index(): JsonResponse
     {
-        $loans = Loan::with(['book', 'patron'])->paginate(10);
+        $user = auth()->user();
+
+        if ($user->role === 'patron') {
+            $loans = Loan::where('patron_id', $user->id)->paginate(10);
+        } else {
+            $loans = Loan::paginate(10);
+        }
+
         return response()->json($loans);
     }
 
@@ -47,9 +54,13 @@ class LoanController extends Controller
 
     public function show(Loan $loan): JsonResponse
     {
-        return response()->json([
-            'data' => $loan->load(['book','patron']),
-        ]);
+        $user = auth()->user();
+
+        if ($user->role !== 'admin' && $loan->patron_id !== $user->id) {
+            return response()->json(['message' => 'Forbidden'], 403);
+        }
+
+        return response()->json(['data' => $loan]);
     }
 
     public function update(Request $request, Loan $loan): JsonResponse
@@ -64,7 +75,7 @@ class LoanController extends Controller
         $loan->update($validated);
 
         return response()->json([
-            'data' => $loan->load(['book','patron']),
+            'data' => $loan->load(['book', 'patron']),
             'message' => 'Loan updated successfully',
         ]);
     }
