@@ -5,7 +5,7 @@ namespace App\Http\Requests;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
-class PatronRequest extends FormRequest
+class PatronUpdateRequest extends FormRequest
 {
     public function authorize(): bool
     {
@@ -17,9 +17,9 @@ class PatronRequest extends FormRequest
         $patron = $this->route('patron');
 
         return [
-            'name'  => 'required|string|max:255',
+            'name'  => 'sometimes|string|max:255',
             'email' => [
-                'required',
+                'sometimes',
                 'email',
                 Rule::unique('patrons', 'email')->ignore($patron?->id),
             ],

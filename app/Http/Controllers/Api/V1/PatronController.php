@@ -7,6 +7,7 @@ use App\Models\Patron;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use App\Http\Requests\PatronRequest;
+use App\Http\Requests\PatronUpdateRequest;
 
 class PatronController extends Controller
 {
@@ -39,7 +40,7 @@ class PatronController extends Controller
         return response()->json(['data' => $patron]);
     }
 
-    public function update(PatronRequest $request, Patron $patron): JsonResponse
+    public function update(PatronUpdateRequest $request, Patron $patron): JsonResponse
     {
         $data = $request->validated();
 

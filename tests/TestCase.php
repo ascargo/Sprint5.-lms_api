@@ -2,32 +2,27 @@
 
 namespace Tests;
 
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
-use Illuminate\Support\Facades\Artisan;
-use Illuminate\Support\Facades\Schema;
 
 abstract class TestCase extends BaseTestCase
 {
     use CreatesApplication;
+    use RefreshDatabase;
 
     protected function setUp(): void
     {
         parent::setUp();
 
-        if (!Schema::hasTable('oauth_clients')) {
-            Artisan::call('migrate', [
-                '--path' => 'vendor/laravel/passport/database/migrations',
-                '--realpath' => true,
-                '--no-interaction' => true,
-            ]);
-        }
+        $this->artisan('migrate', ['--force' => true]);
 
-        Artisan::call('passport:keys', ['--force' => true]);
+        $this->artisan('passport:keys', ['--force' => true]);
 
-        Artisan::call('passport:client', [
+        $this->artisan('passport:client', [
             '--personal' => true,
-            '--name' => 'Testing Personal Access Client',
             '--no-interaction' => true,
+            '--provider' => 'users',
+            '--name' => 'Testing Personal Client',
         ]);
     }
 }
