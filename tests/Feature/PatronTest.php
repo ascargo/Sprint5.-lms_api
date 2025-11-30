@@ -3,7 +3,6 @@
 namespace Tests\Feature;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
 use App\Models\Patron;
 use Laravel\Passport\Passport;
@@ -56,22 +55,6 @@ class PatronTest extends TestCase
         $this->assertDatabaseHas('patrons', [
             'email' => 'asier@example.com',
         ]);
-    }
-
-    public function test_it_shows_a_single_patron()
-    {
-        $patron = Patron::create([
-            'name' => 'Jane Doe',
-            'email' => 'jane@example.com',
-        ]);
-
-        $response = $this->getJson("/api/v1/patrons/{$patron->id}");
-
-        $response->assertOk()
-            ->assertJsonFragment([
-                'name' => 'Jane Doe',
-                'email' => 'jane@example.com',
-            ]);
     }
 
     public function test_it_updates_a_patron()

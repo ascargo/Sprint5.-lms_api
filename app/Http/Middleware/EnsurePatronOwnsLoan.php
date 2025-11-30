@@ -10,8 +10,8 @@ class EnsurePatronOwnsLoan
 {
     public function handle(Request $request, Closure $next): Response
     {
-        $user = $request->user();
         $loan = $request->route('loan');
+        $user = auth()->user();
 
         if ($user->role === 'admin') {
             return $next($request);

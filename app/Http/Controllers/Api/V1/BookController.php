@@ -62,18 +62,14 @@ class BookController extends Controller
 
     public function update(BookUpdateRequest $request, Book $book): JsonResponse
     {
-        if (!$book || app()->environment('scribe')) {
-            $book = Book::first() ?? Book::factory()->create();
-        }
-        $data = $request->validated();
-
-        $book->update($data);
+        $book->update($request->validated());
 
         return response()->json([
             'data' => $book,
             'message' => 'Book updated successfully',
-        ]);
+        ], 200);
     }
+
 
     /**
      * Remove the specified book.

@@ -7,6 +7,7 @@ use App\Models\Patron;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use App\Http\Requests\PatronRequest;
+use App\Http\Requests\PatronUpdateRequest;
 
 class PatronController extends Controller
 {
@@ -30,12 +31,16 @@ class PatronController extends Controller
 
     public function show(Patron $patron): JsonResponse
     {
-        return response()->json([
-            'data' => $patron,
-        ]);
+        $user = auth()->user();
+
+        if ($user->role !== 'admin' && $user->id !== $patron->id) {
+            return response()->json(['message' => 'Forbidden'], 403);
+        }
+
+        return response()->json(['data' => $patron]);
     }
 
-    public function update(PatronRequest $request, Patron $patron): JsonResponse
+    public function update(PatronUpdateRequest $request, Patron $patron): JsonResponse
     {
         $data = $request->validated();
 
