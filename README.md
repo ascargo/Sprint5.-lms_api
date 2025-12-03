@@ -84,12 +84,12 @@ API structure
 All tests pass ➜ 100% green ✔
 
 📦 Installation Instructions
-1️⃣ Clone Repository & Install Dependencies
+1️.Clone Repository & Install Dependencies
 git clone https://github.com/ascargo/Sprint5.-lms_api.git
 cd lms-api
 composer install
 
-2️⃣ Copy & Configure Environment
+2.Copy & Configure Environment
 cp .env.example .env
 php artisan key:generate
 
@@ -100,8 +100,18 @@ DB_DATABASE=lms_api
 DB_USERNAME=root
 DB_PASSWORD=your_password
 
-3️⃣ Run Migrations & Seeders
-php artisan migrate:fresh --seed
+Create database:
+
+CREATE DATABASE lms_api CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+If you see:
+
+ERROR 1007 (HY000): Can't create database 'lms_api'; database exists
+
+It simply means the database is already created — continue normally.
+
+3.Run Migrations & Seeders
+php artisan migrate
 
 This will generate:
 Default Admin
@@ -114,8 +124,26 @@ Auto-created (3 random users).
 Books & Loans
 ~50 books, 10 loans, 5 overdue loans.
 
-4️⃣ Start Development Server
+4.Passport Installation
+
+Run:
+php artisan passport:install
+
+This will generate:
+Personal Access Client
+Password Grant Client
+Encryption keys
+
+5.Start Development Server
 php artisan serve
+
+🧪 Running Tests
+php artisan test
+
+Expected result:
+Tests: 35 passed
+100% green ✔
+
 API now lives at:
 👉 http://127.0.0.1:8000/api/v1
 
@@ -133,13 +161,6 @@ request/response examples
 authentication instructions
 Postman collection
 OpenAPI/Swagger file
-
-🧪 Running Tests
-php artisan test
-
-Expected result:
-Tests: 35 passed
-100% green ✔
 
 🗂️ Project Structure (Important Folders)
 app/

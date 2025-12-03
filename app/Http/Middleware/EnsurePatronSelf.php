@@ -17,7 +17,7 @@ class EnsurePatronSelf
             return $next($request);
         }
 
-        if ($patron->id !== $user->id) {
+        if ($patron->id !== $user->patron?->id) {
             return response()->json(['message' => 'Forbidden'], 403);
         }
 

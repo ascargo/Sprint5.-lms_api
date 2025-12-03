@@ -17,6 +17,9 @@ return Application::configure(basePath: dirname(__DIR__))
             'role' => \App\Http\Middleware\EnsureUserHasRole::class,
             'patron.owns.loan' => \App\Http\Middleware\EnsurePatronOwnsLoan::class,
         ]);
+
+        // API: respond 401 JSON instead of redirecting to a non-existent login page.
+        $middleware->redirectGuestsTo(fn () => null);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

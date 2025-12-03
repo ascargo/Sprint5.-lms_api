@@ -8,17 +8,23 @@ use Illuminate\Http\JsonResponse;
 use App\Models\Book;
 use App\Models\Loan;
 use App\Models\Patron;
+use Illuminate\Support\Facades\DB;
 
 class LoanController extends Controller
 {
     public function index(): JsonResponse
     {
         $user = auth()->user();
+        $perPage = request()->integer('per_page', 10);
 
-        if ($user->role === 'patron') {
-            $loans = Loan::where('patron_id', $user->id)->paginate(10);
+        if ($user->role !== 'admin') {
+            $patronId = $user->patron?->id;
+
+            $loans = Loan::with(['book', 'patron'])
+                ->where('patron_id', $patronId ?? 0)
+                ->paginate($perPage);
         } else {
-            $loans = Loan::paginate(10);
+            $loans = Loan::with(['book', 'patron'])->paginate($perPage);
         }
 
         return response()->json($loans);
@@ -56,7 +62,7 @@ class LoanController extends Controller
     {
         $user = auth()->user();
 
-        if ($user->role !== 'admin' && $loan->patron_id !== $user->id) {
+        if ($user->role !== 'admin' && $loan->patron_id !== $user->patron?->id) {
             return response()->json(['message' => 'Forbidden'], 403);
         }
 
@@ -70,9 +76,15 @@ class LoanController extends Controller
             'patron_id' => 'sometimes|exists:patrons,id',
             'loaned_at' => 'sometimes|date',
             'due_at' => 'sometimes|date|after_or_equal:loaned_at',
+            'returned_at' => 'sometimes|nullable|date|after_or_equal:loaned_at',
         ]);
 
         $loan->update($validated);
+
+        // If marking as returned, set book as available again.
+        if (array_key_exists('returned_at', $validated) && $validated['returned_at']) {
+            $loan->book?->update(['status' => 'available']);
+        }
 
         return response()->json([
             'data' => $loan->load(['book', 'patron']),
@@ -87,5 +99,43 @@ class LoanController extends Controller
         $book->update(['status' => 'available']);
 
         return response()->json(null, 204);
+    }
+
+    /**
+     * Dev/maintenance helper: align book.status with active loans.
+     * - Any book with an active (not returned) loan is set to "loaned".
+     * - Any book with no active loans is set to "available".
+     * Only available in local environment; protect with auth:api + admin in routes.
+     */
+    public function syncBookStatuses(): JsonResponse
+    {
+        if (! app()->environment('local')) {
+            return response()->json(['message' => 'Forbidden'], 403);
+        }
+
+        $updatedLoaned = 0;
+        $updatedAvailable = 0;
+
+        DB::transaction(function () use (&$updatedLoaned, &$updatedAvailable) {
+            $activeBookIds = Loan::whereNull('returned_at')->pluck('book_id')->unique()->all();
+
+            // Books with active loans should be marked as loaned
+            if (! empty($activeBookIds)) {
+                $updatedLoaned = Book::whereIn('id', $activeBookIds)
+                    ->where('status', '!=', 'loaned')
+                    ->update(['status' => 'loaned']);
+            }
+
+            // Books without active loans should be available
+            $updatedAvailable = Book::whereNotIn('id', $activeBookIds)
+                ->where('status', '!=', 'available')
+                ->update(['status' => 'available']);
+        });
+
+        return response()->json([
+            'message' => 'Book statuses synchronized',
+            'updated_to_loaned' => $updatedLoaned,
+            'updated_to_available' => $updatedAvailable,
+        ]);
     }
 }

@@ -11,9 +11,21 @@ use App\Http\Requests\PatronUpdateRequest;
 
 class PatronController extends Controller
 {
-    public function index(): JsonResponse
+    public function index(Request $request): JsonResponse
     {
-        return response()->json(Patron::paginate(10));
+        $perPage = $request->integer('per_page', 10);
+        $search = $request->query('search');
+
+        $patrons = Patron::query()
+            ->when($search, function ($query) use ($search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%")
+                        ->orWhere('email', 'like', "%{$search}%");
+                });
+            })
+            ->paginate($perPage);
+
+        return response()->json($patrons);
     }
 
     public function store(PatronRequest $request): JsonResponse
@@ -33,7 +45,7 @@ class PatronController extends Controller
     {
         $user = auth()->user();
 
-        if ($user->role !== 'admin' && $user->id !== $patron->id) {
+        if ($user->role !== 'admin' && $user->patron?->id !== $patron->id) {
             return response()->json(['message' => 'Forbidden'], 403);
         }
 
@@ -57,5 +69,16 @@ class PatronController extends Controller
         $patron->delete();
 
         return response()->json(null, 204);
+    }
+
+    public function me(Request $request): JsonResponse
+    {
+        $patron = $request->user()?->patron;
+
+        if (! $patron) {
+            return response()->json(['message' => 'Patron profile not found'], 404);
+        }
+
+        return response()->json(['data' => $patron]);
     }
 }

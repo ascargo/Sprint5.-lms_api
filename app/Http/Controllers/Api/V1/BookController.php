@@ -13,12 +13,14 @@ class BookController extends Controller
 {
     public function index(Request $request)
     {
+        $perPage = $request->integer('per_page', 10);
+
         $books = Book::query()
             ->status($request->query('status'))
             ->author($request->query('author'))
             ->title($request->query('title'))
             ->genre($request->query('genre'))
-            ->paginate(10);
+            ->paginate($perPage);
 
         return $books;
     }

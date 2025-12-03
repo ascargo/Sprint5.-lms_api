@@ -17,7 +17,7 @@ class EnsurePatronOwnsLoan
             return $next($request);
         }
 
-        if ($loan->patron_id !== $user->id) {
+        if ($loan->patron_id !== $user->patron?->id) {
             return response()->json(['message' => 'Forbidden'], 403);
         }
 
