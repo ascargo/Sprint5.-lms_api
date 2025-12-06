@@ -9,12 +9,14 @@ use App\Http\Controllers\Api\V1\DashboardController;
 
 Route::prefix('v1')->group(function () {
     Route::post('/auth/login', [AuthController::class, 'login']);
+    Route::post('/auth/register', [AuthController::class, 'register']);
 
     Route::get('/books', [BookController::class, 'index']);
-    Route::get('/books/{id}', [BookController::class, 'show']);
+    Route::get('/books/{book}', [BookController::class, 'show']);
 
     Route::middleware('auth:api')->group(function () {
         Route::get('/auth/me', [AuthController::class, 'me']);
+        Route::post('/auth/logout', [AuthController::class, 'logout']);
         Route::get('/dashboard', [DashboardController::class, 'index']);
 
         Route::get('/patrons/me', [PatronController::class, 'showMe']);
@@ -35,6 +37,7 @@ Route::prefix('v1')->group(function () {
             Route::delete('/patrons/{patron}', [PatronController::class, 'destroy']);
 
             Route::get('/loans', [LoanController::class, 'index']);
+            Route::get('/loans/{loan}', [LoanController::class, 'show']);
             Route::post('/loans', [LoanController::class, 'store']);
             Route::put('/loans/{loan}', [LoanController::class, 'update']);
             Route::delete('/loans/{loan}', [LoanController::class, 'destroy']);

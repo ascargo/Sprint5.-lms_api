@@ -52,6 +52,17 @@ class LoanController extends Controller
         ], 201);
     }
 
+    public function myLoans(): JsonResponse
+    {
+        $user = auth()->user();
+
+        $loans = Loan::with(['book', 'patron'])
+            ->where('patron_id', $user->id)
+            ->paginate(10);
+
+        return response()->json($loans);
+    }
+
     public function show(Loan $loan): JsonResponse
     {
         $user = auth()->user();
@@ -77,6 +88,27 @@ class LoanController extends Controller
         return response()->json([
             'data' => $loan->load(['book', 'patron']),
             'message' => 'Loan updated successfully',
+        ]);
+    }
+
+    public function requestExtension(Request $request, Loan $loan): JsonResponse
+    {
+        $user = auth()->user();
+
+        if ($loan->patron_id !== $user->id) {
+            return response()->json(['message' => 'Forbidden'], 403);
+        }
+
+        $validated = $request->validate([
+            'due_at' => 'required|date|after:' . $loan->due_at,
+            // TODO: if a dedicated requested_return_date column is added, switch to it here.
+        ]);
+
+        $loan->update(['due_at' => $validated['due_at']]);
+
+        return response()->json([
+            'data' => $loan->load(['book', 'patron']),
+            'message' => 'Extension requested successfully',
         ]);
     }
 
