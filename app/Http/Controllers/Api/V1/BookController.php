@@ -13,14 +13,26 @@ class BookController extends Controller
 {
     public function index(Request $request)
     {
-        $books = Book::query()
+        $query = Book::query()
             ->status($request->query('status'))
             ->author($request->query('author'))
             ->title($request->query('title'))
             ->genre($request->query('genre'))
-            ->paginate(10);
+            ->orderBy('id', 'asc');
 
-        return $books;
+        $perPageParam = $request->query('per_page', 100);
+
+        if ($perPageParam === 'all') {
+            return response()->json([
+                'data' => $query->get(),
+            ]);
+        }
+
+        $perPage = (int) $perPageParam;
+        $perPage = max(1, min($perPage, 1000));
+        $page = max(1, (int) $request->query('page', 1));
+
+        return $query->paginate($perPage, ['*'], 'page', $page);
     }
 
 

@@ -151,7 +151,7 @@ class BookTest extends TestCase
     {
         Book::factory()->count(30)->create();
 
-        $response = $this->getJson('/api/v1/books');
+        $response = $this->getJson('/api/v1/books?per_page=10');
 
         $response->assertOk()
             ->assertJsonStructure([

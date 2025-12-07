@@ -3,25 +3,38 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use Illuminate\Http\JsonResponse;
 use App\Models\Book;
 use App\Models\Loan;
 use App\Models\Patron;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class LoanController extends Controller
 {
-    public function index(): JsonResponse
+    public function index(Request $request): JsonResponse
     {
         $user = auth()->user();
 
+        $perPageParam = $request->query('per_page', 25);
+        $page = max(1, (int) $request->query('page', 1));
+
+        $query = Loan::query();
+
         if ($user->role === 'patron') {
-            $loans = Loan::where('patron_id', $user->id)->paginate(10);
-        } else {
-            $loans = Loan::paginate(10);
+            $query->where('patron_id', $user->id);
         }
 
-        return response()->json($loans);
+        if ($perPageParam === 'all') {
+            return response()->json([
+                'data' => $query->get(),
+            ]);
+        }
+
+        $perPage = max(1, min((int) $perPageParam, 1000));
+
+        return response()->json(
+            $query->paginate($perPage, ['*'], 'page', $page)
+        );
     }
 
     public function store(Request $request): JsonResponse
@@ -52,15 +65,27 @@ class LoanController extends Controller
         ], 201);
     }
 
-    public function myLoans(): JsonResponse
+    public function myLoans(Request $request): JsonResponse
     {
         $user = auth()->user();
 
-        $loans = Loan::with(['book', 'patron'])
-            ->where('patron_id', $user->id)
-            ->paginate(10);
+        $perPageParam = $request->query('per_page', 25);
+        $page = max(1, (int) $request->query('page', 1));
 
-        return response()->json($loans);
+        $query = Loan::with(['book', 'patron'])
+            ->where('patron_id', $user->id);
+
+        if ($perPageParam === 'all') {
+            return response()->json([
+                'data' => $query->get(),
+            ]);
+        }
+
+        $perPage = max(1, min((int) $perPageParam, 1000));
+
+        return response()->json(
+            $query->paginate($perPage, ['*'], 'page', $page)
+        );
     }
 
     public function show(Loan $loan): JsonResponse
