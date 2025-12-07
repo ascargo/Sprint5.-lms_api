@@ -13,5 +13,6 @@ class Patron extends Model
     protected $fillable = [
         'name',
         'email',
+        'role',
     ];
 }

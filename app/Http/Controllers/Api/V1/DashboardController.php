@@ -17,6 +17,7 @@ class DashboardController extends Controller
         $activeLoansCount = Loan::whereNull('returned_at')->count();
         $totalPatrons = Patron::count();
         $activePatronsCount = $totalPatrons; // TODO: filter by active status once field exists.
+        $overdueLoansCount = Loan::overdue()->count();
         $recentBooks = Book::orderByDesc('created_at')
             ->take(5)
             ->get(['id', 'title', 'author', 'genre', 'created_at']);
@@ -28,7 +29,9 @@ class DashboardController extends Controller
                 'loaned_books' => Book::where('status', 'loaned')->count(),
                 'total_patrons' => $totalPatrons,
                 'loans_count' => $loansCount,
+                'active_loans' => $activeLoansCount,
                 'active_loans_count' => $activeLoansCount,
+                'overdue_loans' => $overdueLoansCount,
                 'active_patrons_count' => $activePatronsCount,
                 'recent_books' => $recentBooks,
             ],

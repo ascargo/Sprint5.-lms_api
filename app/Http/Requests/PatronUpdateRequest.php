@@ -23,6 +23,10 @@ class PatronUpdateRequest extends FormRequest
                 'email',
                 Rule::unique('patrons', 'email')->ignore($patron?->id),
             ],
+            'role' => [
+                'sometimes',
+                Rule::in(['admin', 'patron']),
+            ],
         ];
     }
 }

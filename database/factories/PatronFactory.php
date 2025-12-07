@@ -19,6 +19,7 @@ class PatronFactory extends Factory
         return [
             'name' => fake()->name(),
             'email' => fake()->unique()->safeEmail(),
+            'role' => 'patron',
         ];
     }
 }

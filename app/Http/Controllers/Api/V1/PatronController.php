@@ -14,12 +14,29 @@ class PatronController extends Controller
 {
     public function index(): JsonResponse
     {
-        return response()->json(Patron::paginate(10));
+        $perPage = (int) request()->query('per_page', 100);
+        $perPage = max(1, min($perPage, 1000));
+
+        $query = Patron::query();
+
+        if ($search = request()->query('search')) {
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%");
+            });
+        }
+
+        if ($role = request()->query('role')) {
+            $query->where('role', $role);
+        }
+
+        return response()->json($query->paginate($perPage));
     }
 
     public function store(PatronRequest $request): JsonResponse
     {
         $data = $request->validated();
+        $data['role'] = $data['role'] ?? 'patron';
 
         $patron = Patron::create($data);
 
@@ -55,7 +72,6 @@ class PatronController extends Controller
     public function update(PatronUpdateRequest $request, Patron $patron): JsonResponse
     {
         $data = $request->validated();
-
         $patron->update($data);
 
         return response()->json([
